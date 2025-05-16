@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>QAM Visualization</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    canvas {
+      margin-top: 20px;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h2>QAM Signal Visualization</h2>
+  <label>I0: <input type="number" id="I0" value="1"></label>
+  <label>I1: <input type="number" id="I1" value="-1"></label>
+  <label>Q0: <input type="number" id="Q0" value="1"></label>
+  <label>Q1: <input type="number" id="Q1" value="-1"></label>
+  <button onclick="plotQAM()">Plot</button>
+
+  <canvas id="qamChart"></canvas>
+
+  <script>
+    function plotQAM() {
+      const I0 = parseFloat(document.getElementById("I0").value);
+      const I1 = parseFloat(document.getElementById("I1").value);
+      const Q0 = parseFloat(document.getElementById("Q0").value);
+      const Q1 = parseFloat(document.getElementById("Q1").value);
+
+      const iWave = [], qWave = [], sumWave = [];
+      const steps = 500;
+      const T = 4 * Math.PI;
+      const omega = 1;
+
+      for (let i = 0; i <= steps; i++) {
+        const time = (T * i) / steps;
+        const I = time <= 2 * Math.PI ? I0 : I1;
+        const Q = time <= 2 * Math.PI ? Q0 : Q1;
+        const iPart = I * Math.cos(omega * time);
+        const qPart = Q * Math.sin(omega * time);
+        iWave.push({ x: time, y: iPart });
+        qWave.push({ x: time, y: qPart });
+        sumWave.push({ x: time, y: iPart + qPart });
+      }
+
+      const data = {
+        datasets: [
+          {
+            label: 'I(t)cos(wt)',
+            data: iWave,
+            borderColor: 'blue',
+            borderWidth: 1,
+            fill: false,
+            pointRadius: 0,
+            parsing: false
+          },
+          {
+            label: 'Q(t)sin(wt)',
+            data: qWave,
+            borderColor: 'red',
+            borderWidth: 1,
+            fill: false,
+            pointRadius: 0,
+            parsing: false
+          },
+          {
+            label: 'Sum (QAM signal)',
+            data: sumWave,
+            borderColor: 'green',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            parsing: false
+          }
+        ]
+      };
+
+      const config = {
+        type: 'line',
+        data: data,
+        options: {
+          responsive: true,
+          animation: false,
+          scales: {
+            x: {
+              type: 'linear',
+              title: {
+                display: true,
+                text: 'Time (t)'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Amplitude'
+              }
+            }
+          }
+        }
+      };
+
+      if (window.qamChart) {
+        window.qamChart.destroy();
+      }
+      window.qamChart = new Chart(document.getElementById('qamChart'), config);
+    }
+  </script>
+</body>
+</html>
